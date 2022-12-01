@@ -22,24 +22,8 @@ fn entry_part_1(input: &[Vec<usize>]) -> usize {
 
 #[aoc(day1, part2)]
 fn entry_part_2(input: &[Vec<usize>]) -> usize {
-    // No quickselect used here due to fixed and small k
-    let iter = input.iter().map(|chunk| chunk.iter().sum());
-
-    let mut top = 0;
-    let mut mid = 0;
-    let mut bot = 0;
-
-    for sum in iter {
-        if sum > top {
-            bot = mid;
-            mid = top;
-            top = sum;
-        } else if sum > mid {
-            bot = mid;
-            mid = sum;
-        } else if sum > bot {
-            bot = sum;
-        }
-    }
-    top + mid + bot
+    const K: usize = 3;
+    let mut sums: Vec<usize> = input.iter().map(|chunk| chunk.iter().sum()).collect();
+    sums.select_nth_unstable_by(K, |l, r| r.cmp(l));
+    sums.iter().take(K).sum()
 }
