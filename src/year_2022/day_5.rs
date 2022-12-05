@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+
 #[derive(Debug)]
 struct Instruction {
     count: usize,
@@ -8,6 +10,14 @@ struct Instruction {
 struct Supplies {
     stacks: Vec<Vec<u8>>,
     instructions: Vec<Instruction>, // n from to
+}
+
+#[allow(unused)]
+fn debug(stacks: &[Vec<u8>]) {
+    println!();
+    for v in stacks {
+        println!("{}", std::str::from_utf8(v).unwrap());
+    }
 }
 
 #[aoc_generator(day5)]
@@ -64,9 +74,21 @@ fn repeated_stack_top(input: &Supplies) -> String {
     let mut stacks = input.stacks.to_owned();
     for instr in input.instructions.iter() {
         let at = stacks[instr.from].len() - instr.count;
-        // Kinda slow with all the intermediate allocations
-        let top = stacks[instr.from].split_off(at);
-        stacks[instr.to].extend(top);
+        let (src, dest) = match instr.from.cmp(&instr.to) {
+            Ordering::Less => {
+                let (_, src) = stacks.split_at_mut(instr.from);
+                let (src, dest) = src.split_at_mut(instr.to - instr.from);
+                (&mut src[0], &mut dest[0])
+            }
+            Ordering::Greater => {
+                let (_, dest) = stacks.split_at_mut(instr.to);
+                let (dest, src) = dest.split_at_mut(instr.from - instr.to);
+                (&mut src[0], &mut dest[0])
+            }
+            _ => continue,
+        };
+        let top = src.drain(at..);
+        dest.extend(top);
     }
     let tops: Vec<_> = stacks.iter_mut().map(|s| s.pop().unwrap()).collect();
     String::from_utf8(tops).unwrap()
