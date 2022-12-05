@@ -1,12 +1,15 @@
 struct Range {
     start: u32,
-    end: u32
+    end: u32,
 }
 
 impl Range {
     fn from_str(s: &str) -> Self {
         let (start, end) = s.split_once('-').unwrap();
-        Self { start: start.parse().unwrap(), end: end.parse().unwrap() }
+        Self {
+            start: start.parse().unwrap(),
+            end: end.parse().unwrap(),
+        }
     }
 
     fn contains(&self, other: &Range) -> bool {
@@ -20,24 +23,22 @@ impl Range {
 
 #[aoc_generator(day4)]
 fn generator(input: &str) -> Vec<(Range, Range)> {
-    input.lines().map(
-        |line| {
+    input
+        .lines()
+        .map(|line| {
             let (l, r) = line.split_once(',').unwrap();
             let left = Range::from_str(l);
             let right = Range::from_str(r);
             (left, right)
-        }
-    )
-    .collect()
+        })
+        .collect()
 }
 
 #[aoc(day4, part1)]
 fn containment(input: &[(Range, Range)]) -> usize {
     input
         .iter()
-        .filter(
-            |(l, r)| l.contains(r) || r.contains(l)
-        )
+        .filter(|(l, r)| l.contains(r) || r.contains(l))
         .count()
 }
 
@@ -48,4 +49,3 @@ fn overlap(input: &[(Range, Range)]) -> usize {
         .filter(|(l, r)| l.overlaps_left(r) || r.overlaps_left(l))
         .count()
 }
-
