@@ -1,6 +1,6 @@
 #[aoc_generator(day6)]
 fn generator(input: &[u8]) -> Vec<u64> {
-    input.iter().map(|c| 1 << (*c as u64)).collect()
+    input.iter().map(|c| 1 << ((*c - b'A') as u64)).collect()
 }
 
 fn bithash(slice: &[u64]) -> u64 {
