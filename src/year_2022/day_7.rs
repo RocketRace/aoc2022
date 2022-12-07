@@ -3,7 +3,7 @@ use std::collections::HashMap;
 #[derive(Debug, Clone)]
 enum Node {
     File(u64),
-    // size is set to 0
+    // size is populated after construction
     Directory {children: HashMap<String, Node>, parent: *mut Node, size: u64}
 }
 
@@ -29,6 +29,7 @@ fn generator(input: &str) -> Node {
                         assert!(!parent.is_null(), "root directory has no parent");
                         // we've checked parent to be non-null
                         // everything else it could point to exists in `tree`
+                        // also cwd is never aliased
                         cwd = unsafe {
                             &mut *parent
                         };
