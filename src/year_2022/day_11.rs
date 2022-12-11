@@ -1,3 +1,5 @@
+use num::integer::lcm;
+
 #[derive(Debug, Clone, Copy)]
 enum Operation {
     Add(u64),
@@ -27,10 +29,15 @@ impl Monkey {
     fn handle(&self, x: u64, relief: u64, factor: u64) -> Item {
         let post_op = self.op.apply(x) / relief % factor;
         if post_op % self.test == 0 {
-            Item { value: post_op, index: self.success }
-        }
-        else {
-            Item { value: post_op, index: self.failure }
+            Item {
+                value: post_op,
+                index: self.success,
+            }
+        } else {
+            Item {
+                value: post_op,
+                index: self.failure,
+            }
         }
     }
 }
@@ -89,7 +96,7 @@ fn generator(input: &str) -> (Vec<Monkey>, Vec<Item>) {
 
 fn juggle((monkeys, items): &(Vec<Monkey>, Vec<Item>), steps: usize, relief: u64) -> u64 {
     let mut counters = vec![0; monkeys.len()];
-    let factor: u64 = monkeys.iter().map(|m| m.test).fold(1, num::integer::lcm);
+    let factor = monkeys.iter().map(|m| m.test).fold(1, lcm);
     let mut items = (*items).clone();
     for _ in 0..steps {
         for item in items.iter_mut() {
@@ -110,8 +117,7 @@ fn juggle((monkeys, items): &(Vec<Monkey>, Vec<Item>), steps: usize, relief: u64
         if count > first {
             second = first;
             first = count;
-        }
-        else if count > second {
+        } else if count > second {
             second = count;
         }
     }
