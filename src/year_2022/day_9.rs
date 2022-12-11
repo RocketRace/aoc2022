@@ -112,30 +112,28 @@ fn multi_tail<const KNOTS: usize>(input: &[Vector2]) -> usize {
                     // The two knots are now aligned
                     let trail = head - *tail;
                     let step = trail.normalize();
-                    
+
                     if joint == last - 1 {
                         for i in 0..trail.norm() {
                             visited.insert(*tail + step * i);
                         }
                     }
                     *tail += trail - step;
-                }
-                else {
+                } else {
                     // Any further knots won't move if this one's still
                     break;
                 }
             }
         };
 
-        // Finer motion resolution is required to simulate 
+        // Finer motion resolution is required to simulate
         // the universe with multiple knots
         if KNOTS > 2 {
             let step = delta.normalize();
             for _ in 0..delta.norm() {
                 simulation_step(step);
             }
-        }
-        else {
+        } else {
             simulation_step(delta);
         }
     }
