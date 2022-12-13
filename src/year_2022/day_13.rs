@@ -7,7 +7,7 @@ use nom::{
     combinator::map,
     multi::separated_list0,
     number::complete::double,
-    sequence::{preceded, terminated},
+    sequence::delimited,
 };
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -20,9 +20,9 @@ impl Ord for Packet {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Packet::Int(x), Packet::Int(y)) => x.cmp(y),
-            (x @ Packet::Int(_), Packet::List(ys)) => slice::from_ref(x).cmp(ys),
-            (Packet::List(xs), y @ Packet::Int(_)) => xs[..].cmp(slice::from_ref(y)),
             (Packet::List(xs), Packet::List(ys)) => xs.cmp(ys),
+            (x, Packet::List(ys)) => slice::from_ref(x).cmp(ys),
+            (Packet::List(xs), y) => xs[..].cmp(slice::from_ref(y)),
         }
     }
 }
@@ -33,13 +33,20 @@ impl PartialOrd for Packet {
     }
 }
 
+impl Packet {
+    fn wrap(self) -> Self {
+        Self::List(vec![self])
+    }
+}
+
 fn parse_packet(input: &str) -> nom::IResult<&str, Packet> {
     alt((
         map(double, |n| Packet::Int(n as u32)),
         map(
-            preceded(
+            delimited(
                 char('['),
-                terminated(separated_list0(char(','), parse_packet), char(']')),
+                separated_list0(char(','), parse_packet),
+                char(']')
             ),
             Packet::List,
         ),
@@ -75,11 +82,12 @@ fn sorted(input: &[(Packet, Packet)]) -> usize {
         .iter()
         .flat_map(|(l, r)| [l.clone(), r.clone()])
         .collect();
-    let divider = |n| Packet::List(vec![Packet::List(vec![Packet::Int(n)])]);
-    flat.push(divider(2));
-    flat.push(divider(6));
+    let divider_2 = Packet::Int(2).wrap().wrap();
+    let divider_6 = Packet::Int(6).wrap().wrap();
+    flat.push(divider_2.clone());
+    flat.push(divider_6.clone());
     flat.sort();
-    let first = flat.binary_search(&divider(2)).unwrap() + 1;
-    let second = flat.binary_search(&divider(6)).unwrap() + 1;
+    let first = flat.binary_search(&divider_2).unwrap() + 1;
+    let second = flat.binary_search(&divider_6).unwrap() + 1;
     first * second
 }
