@@ -1,3 +1,4 @@
+use core::slice;
 use std::cmp::Ordering;
 
 use nom::{
@@ -16,21 +17,13 @@ enum Packet {
     List(Vec<Packet>),
 }
 
-fn zip_cmp(xs: &[Packet], ys: &[Packet]) -> Ordering {
-    // tiebreaker
-    xs.iter()
-        .zip(ys.iter())
-        .fold(Ordering::Equal, |ord, (x, y)| ord.then_with(|| x.cmp(y)))
-        .then_with(|| xs.len().cmp(&ys.len()))
-}
-
 impl Ord for Packet {
     fn cmp(&self, other: &Self) -> Ordering {
         match (self, other) {
             (Packet::Int(x), Packet::Int(y)) => x.cmp(y),
-            (Packet::Int(x), Packet::List(ys)) => zip_cmp(&[Packet::Int(*x)], ys),
-            (Packet::List(xs), Packet::Int(y)) => zip_cmp(xs, &[Packet::Int(*y)]),
-            (Packet::List(xs), Packet::List(ys)) => zip_cmp(xs, ys),
+            (x @ Packet::Int(_), Packet::List(ys)) => slice::from_ref(x).cmp(ys),
+            (Packet::List(xs), y @ Packet::Int(_)) => xs[..].cmp(slice::from_ref(y)),
+            (Packet::List(xs), Packet::List(ys)) => xs.cmp(ys),
         }
     }
 }
