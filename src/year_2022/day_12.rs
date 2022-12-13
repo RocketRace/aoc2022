@@ -7,7 +7,7 @@ struct Graph {
     end: usize,
     neighbors: Vec<[usize; 4]>,
     reverse_neighbors: Vec<[usize; 4]>,
-    grid: Vec<u8>
+    grid: Vec<u8>,
 }
 
 #[aoc_generator(day12)]
@@ -15,10 +15,10 @@ fn generator(input: &str) -> Graph {
     let width = input.lines().next().unwrap().len();
     let height = input.len() / (width + 1); // newline included
     let vertices = width * height;
-    
+
     let mut neighbors = vec![[usize::MAX; 4]; vertices];
     let mut reverse_neighbors = vec![[usize::MAX; 4]; vertices];
-    
+
     let mut grid: Vec<_> = input.bytes().filter(|&b| b != b'\n').collect();
 
     let start = (0..input.len()).find(|&i| grid[i] == b'S').unwrap();
@@ -50,42 +50,56 @@ fn generator(input: &str) -> Graph {
         }
     }
 
-    Graph { vertices, start, end, neighbors, reverse_neighbors, grid }
+    Graph {
+        vertices,
+        start,
+        end,
+        neighbors,
+        reverse_neighbors,
+        grid,
+    }
 }
 
 #[derive(PartialEq, Eq)]
 struct Node {
     index: usize,
-    distance: u32
+    distance: u32,
 }
 
 #[derive(Debug, Clone, Copy)]
 enum Part {
     One,
-    Two
+    Two,
 }
 
 // dijkstra's algorithm is over twice as slow with the given input
 fn bfs(graph: &Graph, part: Part) -> Option<u32> {
     let mut distances = vec![u32::MAX; graph.vertices];
     let mut heap = VecDeque::new();
-    
+
     let first = match part {
         Part::One => graph.start,
         Part::Two => graph.end,
     };
 
-    heap.push_back(Node {index: first, distance: 0});
+    heap.push_back(Node {
+        index: first,
+        distance: 0,
+    });
     distances[first] = 0;
 
-    while let Some( Node { index, distance } ) = heap.pop_front() {
+    while let Some(Node { index, distance }) = heap.pop_front() {
         // found
         match part {
-            Part::One => if index == graph.end {
-                return Some(distance);
+            Part::One => {
+                if index == graph.end {
+                    return Some(distance);
+                }
             }
-            Part::Two => if graph.grid[index] == b'a' {
-                return Some(distance);
+            Part::Two => {
+                if graph.grid[index] == b'a' {
+                    return Some(distance);
+                }
             }
         }
         // suboptimal
@@ -94,12 +108,15 @@ fn bfs(graph: &Graph, part: Part) -> Option<u32> {
         }
         let neighbors = match part {
             Part::One => &graph.neighbors,
-            Part::Two => &graph.reverse_neighbors
+            Part::Two => &graph.reverse_neighbors,
         };
         for neighbor in neighbors[index] {
             // ooh improvement
             if neighbor != usize::MAX && distance + 1 < distances[neighbor] {
-                heap.push_back(Node { distance: distance + 1, index: neighbor });
+                heap.push_back(Node {
+                    distance: distance + 1,
+                    index: neighbor,
+                });
                 distances[neighbor] = distance + 1;
             }
         }
@@ -116,4 +133,3 @@ fn climb_up(grid: &Graph) -> u32 {
 fn climb_down(grid: &Graph) -> u32 {
     bfs(grid, Part::Two).unwrap()
 }
-
