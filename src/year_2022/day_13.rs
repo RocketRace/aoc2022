@@ -3,13 +3,12 @@ use std::cmp::Ordering;
 
 use nom::{
     branch::alt,
+    character::complete::char,
     combinator::map,
     multi::separated_list0,
     number::complete::double,
     sequence::{preceded, terminated},
 };
-
-use nom::character::complete::char;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 enum Packet {
