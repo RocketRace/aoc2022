@@ -2,12 +2,8 @@ use core::slice;
 use std::cmp::Ordering;
 
 use nom::{
-    branch::alt,
-    character::complete::char,
-    combinator::map,
-    multi::separated_list0,
-    number::complete::double,
-    sequence::delimited,
+    branch::alt, character::complete::char, combinator::map, multi::separated_list0,
+    number::complete::double, sequence::delimited,
 };
 
 #[derive(PartialEq, Eq, Debug, Clone)]
@@ -46,7 +42,7 @@ fn parse_packet(input: &str) -> nom::IResult<&str, Packet> {
             delimited(
                 char('['),
                 separated_list0(char(','), parse_packet),
-                char(']')
+                char(']'),
             ),
             Packet::List,
         ),
