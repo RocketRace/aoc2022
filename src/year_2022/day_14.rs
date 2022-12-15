@@ -66,7 +66,7 @@ fn blit(input: &[Interval], part2: bool) -> u32 {
             }
         }
     }
-    
+
     if part2 {
         for i in 0..WIDTH {
             grid[lowest + 2][i] = 1;
