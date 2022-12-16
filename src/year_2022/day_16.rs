@@ -5,7 +5,7 @@ use std::{
     collections::{BinaryHeap, HashMap},
 };
 
-type Name = (char, char);
+type Name = (u8, u8);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Valve {
@@ -21,7 +21,7 @@ fn generator(input: &str) -> Vec<Valve> {
         .map(|line| {
             let (first, conn) = line.split_once(';').unwrap();
             let (head, flow) = first.split_once(" has flow rate=").unwrap();
-            let name = (head.as_bytes()[6] as char, head.as_bytes()[7] as char);
+            let name = (head.as_bytes()[6] , head.as_bytes()[7] );
             let rate = flow.parse().unwrap();
             let connections = conn
                 .split(", ")
@@ -34,7 +34,7 @@ fn generator(input: &str) -> Vec<Valve> {
                         &b[b.len() - 2..]
                     }
                 })
-                .filter_map(|n| (n.len() == 2).then_some((n[0] as char, n[1] as char)))
+                .filter_map(|n| (n.len() == 2).then_some((n[0] , n[1] )))
                 .collect();
             Valve {
                 name,
@@ -126,7 +126,7 @@ fn solo_vent(input: &[Valve]) -> u32 {
         neighbors.insert(valve.name, valve.connections.clone());
     }
 
-    let start = ('A', 'A');
+    let start = (b'A', b'A');
     // we want the shortest path that visits all relievers in the order that minimizes loss
     // loss = total flow not being released per tick
     let mut heap = BinaryHeap::new();
@@ -209,7 +209,7 @@ fn pair_vent(input: &[Valve]) -> u32 {
         neighbors.insert(valve.name, valve.connections.clone());
     }
 
-    let (my_start, your_start) = (('A', 'A'), ('A', 'A'));
+    let (my_start, your_start) = ((b'A', b'A'), (b'A', b'A'));
     // we want the shortest path that visits all relievers in the order that minimizes loss
     // loss = total flow not being released per tick
     let mut heap = BinaryHeap::new();
