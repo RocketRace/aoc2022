@@ -53,7 +53,7 @@ impl PartialOrd for Interval {
     }
 }
 
-// For more efficient algorithmic complexity, this should use some form of 
+// For more efficient algorithmic complexity, this should use some form of
 // interval tree for faster insertion.
 //
 // However, the number of intervals in the input is very small (less than a hundred),
@@ -65,9 +65,7 @@ struct IntervalList {
 
 impl IntervalList {
     fn new() -> Self {
-        Self {
-            intervals: vec![],
-        }
+        Self { intervals: vec![] }
     }
 
     fn add_interval(&mut self, interval: Interval) {
@@ -94,7 +92,9 @@ impl IntervalList {
     }
 
     fn first_gap(&self, interval: Interval) -> Option<i64> {
-        let start = self.intervals.binary_search(&Interval::unit(interval.start));
+        let start = self
+            .intervals
+            .binary_search(&Interval::unit(interval.start));
         let end = self.intervals.binary_search(&Interval::unit(interval.end));
         match (start, end) {
             (Ok(i), Ok(j)) if i == j => None,
@@ -160,7 +160,7 @@ fn one_row(input: &[Entry]) -> i64 {
         .for_each(|interval| {
             intervals.add_interval(interval);
         });
-    
+
     intervals.total_span()
 }
 
@@ -168,36 +168,36 @@ fn one_row(input: &[Entry]) -> i64 {
 fn full_grid(input: &[Entry]) -> i64 {
     const CHECKED_SIZE: i64 = 4_000_000;
     // The approach from part 1 doesn't work due to the lack of an "efficient" ordering over the grid.
-    let full_range = Interval { start: 0, end: CHECKED_SIZE };
+    let full_range = Interval {
+        start: 0,
+        end: CHECKED_SIZE,
+    };
     let mut intervals = IntervalList::new();
     let mut i = 0;
     while i < CHECKED_SIZE {
-        let it = input
-            .iter()
-            .copied()
-            .filter_map(
-                |Entry {
-                    sensor: (sx, sy),
-                    closest: (bx, by),
-                }| {
-                    let radius_manhattan = (sx - bx).abs() + (sy - by).abs();
-                    let y_offset = (i - sy).abs();
-                    if y_offset <= radius_manhattan {
-                        let width = radius_manhattan - y_offset;
-                        Some(Interval {
-                            start: sx - width,
-                            end: sx + width,
-                        })
-                    } else {
-                        None
-                    }
-                },
-            );
+        let it = input.iter().copied().filter_map(
+            |Entry {
+                 sensor: (sx, sy),
+                 closest: (bx, by),
+             }| {
+                let radius_manhattan = (sx - bx).abs() + (sy - by).abs();
+                let y_offset = (i - sy).abs();
+                if y_offset <= radius_manhattan {
+                    let width = radius_manhattan - y_offset;
+                    Some(Interval {
+                        start: sx - width,
+                        end: sx + width,
+                    })
+                } else {
+                    None
+                }
+            },
+        );
         for interval in it {
             intervals.add_interval(interval);
         }
         if let Some(gap) = intervals.first_gap(full_range) {
-            return gap * CHECKED_SIZE + i
+            return gap * CHECKED_SIZE + i;
         }
         i += 1;
         intervals.clear();
