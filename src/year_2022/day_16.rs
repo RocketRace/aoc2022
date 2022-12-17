@@ -21,20 +21,19 @@ fn generator(input: &str) -> Vec<Valve> {
         .map(|line| {
             let (first, conn) = line.split_once(';').unwrap();
             let (head, flow) = first.split_once(" has flow rate=").unwrap();
-            let name = (head.as_bytes()[6] , head.as_bytes()[7] );
+            let name = (head.as_bytes()[6], head.as_bytes()[7]);
             let rate = flow.parse().unwrap();
             let connections = conn
                 .split(", ")
                 .map(|n| {
                     if n.len() == 2 {
                         n.as_bytes()
-                    }
-                    else {
+                    } else {
                         let b = n.as_bytes();
                         &b[b.len() - 2..]
                     }
                 })
-                .filter_map(|n| (n.len() == 2).then_some((n[0] , n[1] )))
+                .filter_map(|n| (n.len() == 2).then_some((n[0], n[1])))
                 .collect();
             Valve {
                 name,
@@ -91,7 +90,9 @@ impl DoubleHole {
 
 impl Ord for DoubleHole {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.me.cmp(&other.me).then_with(|| self.your_name.cmp(&other.your_name))
+        self.me
+            .cmp(&other.me)
+            .then_with(|| self.your_name.cmp(&other.your_name))
     }
 }
 
@@ -117,8 +118,10 @@ fn solo_vent(input: &[Valve]) -> u32 {
         .cloned()
         .collect();
 
-
-    let total_possible_loss: u32 = suspicious.iter().map(|valve| valve.rate * minutes_left as u32).sum();
+    let total_possible_loss: u32 = suspicious
+        .iter()
+        .map(|valve| valve.rate * minutes_left as u32)
+        .sum();
     let losers = suspicious.len();
 
     let mut neighbors = HashMap::new();
@@ -142,7 +145,6 @@ fn solo_vent(input: &[Valve]) -> u32 {
     min_loss_for.insert(first_hole.key(), 0u32);
     let mut min_loss = u32::MAX;
 
-
     while let Some(hole) = heap.pop() {
         if hole.minutes == 0 {
             min_loss = min_loss.min(hole.loss);
@@ -163,10 +165,15 @@ fn solo_vent(input: &[Valve]) -> u32 {
                     name: hole.name,
                     minutes: hole.minutes - 1,
                     loss: hole.loss + compute_loss(hole.vented, losers, &suspicious),
-                    vented: hole.vented | (1 << index)
+                    vented: hole.vented | (1 << index),
                 };
-    
-                if vent_hole.loss < min_loss_for.get(&vent_hole.key()).copied().unwrap_or(u32::MAX) {
+
+                if vent_hole.loss
+                    < min_loss_for
+                        .get(&vent_hole.key())
+                        .copied()
+                        .unwrap_or(u32::MAX)
+                {
                     heap.push(vent_hole);
                     min_loss_for.insert(vent_hole.key(), vent_hole.loss);
                 }
@@ -177,11 +184,16 @@ fn solo_vent(input: &[Valve]) -> u32 {
             let next_hole = Hole {
                 name: neighbor,
                 minutes: hole.minutes - 1,
-                loss: hole.loss + compute_loss(hole.vented, losers,&suspicious),
+                loss: hole.loss + compute_loss(hole.vented, losers, &suspicious),
                 vented: hole.vented,
             };
 
-            if next_hole.loss < min_loss_for.get(&next_hole.key()).copied().unwrap_or(u32::MAX) {
+            if next_hole.loss
+                < min_loss_for
+                    .get(&next_hole.key())
+                    .copied()
+                    .unwrap_or(u32::MAX)
+            {
                 heap.push(next_hole);
                 min_loss_for.insert(next_hole.key(), next_hole.loss);
             }
@@ -200,8 +212,10 @@ fn pair_vent(input: &[Valve]) -> u32 {
         .cloned()
         .collect();
 
-
-    let total_possible_loss: u32 = suspicious.iter().map(|valve| valve.rate * minutes_left as u32).sum();
+    let total_possible_loss: u32 = suspicious
+        .iter()
+        .map(|valve| valve.rate * minutes_left as u32)
+        .sum();
     let losers = suspicious.len();
 
     let mut neighbors = HashMap::new();
@@ -220,9 +234,9 @@ fn pair_vent(input: &[Valve]) -> u32 {
             loss: 0,
             vented: 0,
         },
-        your_name: your_start
+        your_name: your_start,
     };
-        
+
     heap.push(first_hole);
 
     let mut min_loss_for = HashMap::new();
@@ -245,19 +259,27 @@ fn pair_vent(input: &[Valve]) -> u32 {
 
         if let Some(index) = (0..losers).find(|&i| suspicious[i].name == hole.me.name) {
             if hole.me.vented & (1 << index) == 0 {
-                if let Some(your_index) = (0..losers).find(|&i| suspicious[i].name == hole.your_name) {
+                if let Some(your_index) =
+                    (0..losers).find(|&i| suspicious[i].name == hole.your_name)
+                {
                     if hole.me.vented & (1 << your_index) == 0 {
                         let vent_hole = DoubleHole {
                             me: Hole {
                                 name: hole.me.name,
                                 minutes: hole.me.minutes - 1,
-                                loss: hole.me.loss + compute_loss(hole.me.vented, losers, &suspicious),
-                                vented: hole.me.vented | (1 << index) | (1 << your_index)
+                                loss: hole.me.loss
+                                    + compute_loss(hole.me.vented, losers, &suspicious),
+                                vented: hole.me.vented | (1 << index) | (1 << your_index),
                             },
-                            your_name: hole.your_name
+                            your_name: hole.your_name,
                         };
 
-                        if vent_hole.me.loss < min_loss_for.get(&vent_hole.key()).copied().unwrap_or(u32::MAX) {
+                        if vent_hole.me.loss
+                            < min_loss_for
+                                .get(&vent_hole.key())
+                                .copied()
+                                .unwrap_or(u32::MAX)
+                        {
                             heap.push(vent_hole);
                             min_loss_for.insert(vent_hole.key(), vent_hole.me.loss);
                         }
@@ -269,12 +291,17 @@ fn pair_vent(input: &[Valve]) -> u32 {
                             name: hole.me.name,
                             minutes: hole.me.minutes - 1,
                             loss: hole.me.loss + compute_loss(hole.me.vented, losers, &suspicious),
-                            vented: hole.me.vented | (1 << index)
+                            vented: hole.me.vented | (1 << index),
                         },
-                        your_name: your_neighbor
+                        your_name: your_neighbor,
                     };
-        
-                    if vent_hole.me.loss < min_loss_for.get(&vent_hole.key()).copied().unwrap_or(u32::MAX) {
+
+                    if vent_hole.me.loss
+                        < min_loss_for
+                            .get(&vent_hole.key())
+                            .copied()
+                            .unwrap_or(u32::MAX)
+                    {
                         heap.push(vent_hole);
                         min_loss_for.insert(vent_hole.key(), vent_hole.me.loss);
                     }
@@ -290,12 +317,17 @@ fn pair_vent(input: &[Valve]) -> u32 {
                             name: neighbor,
                             minutes: hole.me.minutes - 1,
                             loss: hole.me.loss + compute_loss(hole.me.vented, losers, &suspicious),
-                            vented: hole.me.vented | (1 << your_index)
+                            vented: hole.me.vented | (1 << your_index),
                         },
-                        your_name: hole.your_name
+                        your_name: hole.your_name,
                     };
 
-                    if vent_hole.me.loss < min_loss_for.get(&vent_hole.key()).copied().unwrap_or(u32::MAX) {
+                    if vent_hole.me.loss
+                        < min_loss_for
+                            .get(&vent_hole.key())
+                            .copied()
+                            .unwrap_or(u32::MAX)
+                    {
                         heap.push(vent_hole);
                         min_loss_for.insert(vent_hole.key(), vent_hole.me.loss);
                     }
@@ -307,12 +339,17 @@ fn pair_vent(input: &[Valve]) -> u32 {
                         name: neighbor,
                         minutes: hole.me.minutes - 1,
                         loss: hole.me.loss + compute_loss(hole.me.vented, losers, &suspicious),
-                        vented: hole.me.vented
+                        vented: hole.me.vented,
                     },
-                    your_name: your_neighbor
+                    your_name: your_neighbor,
                 };
-    
-                if vent_hole.me.loss < min_loss_for.get(&vent_hole.key()).copied().unwrap_or(u32::MAX) {
+
+                if vent_hole.me.loss
+                    < min_loss_for
+                        .get(&vent_hole.key())
+                        .copied()
+                        .unwrap_or(u32::MAX)
+                {
                     heap.push(vent_hole);
                     min_loss_for.insert(vent_hole.key(), vent_hole.me.loss);
                 }

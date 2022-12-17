@@ -21,13 +21,7 @@ const POLYOMINOES: [[u8; 4]; 5] = [
 ];
 
 // width, height
-const DIMENSIONS: [(u8, u8); 5] = [
-    (4, 1),
-    (3, 3),
-    (3, 3),
-    (1, 4),
-    (2, 2)
-];
+const DIMENSIONS: [(u8, u8); 5] = [(4, 1), (3, 3), (3, 3), (1, 4), (2, 2)];
 
 fn overlapping_bits(a: [u8; 4], b: [u8; 4]) -> bool {
     let n = u32::from_ne_bytes(a);
@@ -51,7 +45,7 @@ fn check_collision(board: &[u8], polyomino: usize, x: i8, y: usize) -> bool {
     let shifted_polyomino = POLYOMINOES[polyomino].map(|row| row >> x);
 
     // the polyomino occupies a particular slice of the board
-    let offset = board.len() - y ;
+    let offset = board.len() - y;
     let slice = &board[offset - 4..offset];
     let view = std::array::from_fn(|i| slice[i]);
     overlapping_bits(view, shifted_polyomino)
@@ -78,8 +72,7 @@ fn debug(board: &[u8]) {
             let l = 6 - k;
             if board[j] & (1 << l) != 0 {
                 print!("#");
-            }
-            else {
+            } else {
                 print!(" ");
             }
         }
@@ -128,7 +121,7 @@ fn falling_simulation(input: &[u8], blocks: usize) -> usize {
         // spawn a new polyomino
         let mut x = 2;
         let mut y = 0;
-        
+
         // check for cycles
         let initial_state = fingerprinting.then(|| {
             let state = compute_key(&board, polyomino, step);
@@ -147,26 +140,20 @@ fn falling_simulation(input: &[u8], blocks: usize) -> usize {
             step += 1;
             step %= input.len();
             let delta = match motion {
-                b'<' => {
-                    -1
-                }
-                b'>' => {
-                    1
-                }
-                _ => unreachable!("bad byte in input")
+                b'<' => -1,
+                b'>' => 1,
+                _ => unreachable!("bad byte in input"),
             };
             if !check_collision(&board, polyomino, x + delta, y) {
                 x += delta;
             }
             if !check_collision(&board, polyomino, x, y + 1) {
                 y += 1;
-            }
-            else {
+            } else {
                 let highest_change = freeze_polyomino(&mut board, polyomino, x, y);
                 let growth = if height <= highest_change {
                     highest_change - height
-                }
-                else {
+                } else {
                     0
                 };
                 height = height.max(highest_change);
