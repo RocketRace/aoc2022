@@ -9,8 +9,8 @@ fn big(input: &[u8]) -> usize {
     falling_simulation(input, 1_000_000_000_000)
 }
 
-// Not rigorous but seems to work enough for most input
-const MAX_DEPTH_KEY: usize = 256;
+// Not rigorously chosen but seems to work enough for most input
+const MAX_DEPTH_KEY: usize = 64;
 
 const POLYOMINOES: [[u8; 4]; 5] = [
     [0b1111000, 0b0000000, 0b0000000, 0b0000000], // -
