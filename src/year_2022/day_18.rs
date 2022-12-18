@@ -70,16 +70,14 @@ impl Point {
     const fn air(part2: bool) -> Point {
         if part2 {
             Point::Visitable
-        }
-        else {
+        } else {
             Point::Blocking
         }
     }
     const fn lava(part2: bool) -> Point {
         if part2 {
             Point::Blocking
-        }
-        else {
+        } else {
             Point::Visitable
         }
     }
@@ -112,7 +110,7 @@ fn flood_fill(cubes: &[Cube], part2: bool) -> u32 {
 
     let mut surface_area = 0;
     let mut stack = vec![];
-    if part2{
+    if part2 {
         stack.push(0);
         flood_fill_loop(&mut space, &mut stack, &mut surface_area)
     } else {
