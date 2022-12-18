@@ -83,16 +83,6 @@ impl Point {
     }
 }
 
-// impl Debug for Point {
-//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-//         match self {
-//             Point::Empty => f.write_char(' '),
-//             Point::Lava => f.write_char('!'),
-//             Point::VisitedLava => f.write_char('~'),
-//         }
-//     }
-// }
-
 #[aoc(day18, part1)]
 fn total_surface_area(cubes: &[Cube]) -> u32 {
     flood_fill(cubes, false)
