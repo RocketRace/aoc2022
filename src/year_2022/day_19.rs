@@ -1,10 +1,13 @@
 use std::{
-    collections::{HashMap, BinaryHeap},
+    collections::{BinaryHeap, HashMap},
     ops::{Add, Div, Index, Mul, Sub},
     str::FromStr,
 };
 
-use num::{traits::{Bounded, SaturatingSub}, Zero};
+use num::{
+    traits::{Bounded, SaturatingSub},
+    Zero,
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct Blueprint {
@@ -126,7 +129,12 @@ impl<T: Copy + SaturatingSub<Output = T>> Sub for MatVec<T> {
     fn sub(self, rhs: Self) -> Self::Output {
         let MatVec([a, b, c, d]) = self;
         let MatVec([e, f, g, h]) = rhs;
-        MatVec::new(a.saturating_sub(&e), b.saturating_sub(&f), c.saturating_sub(&g), d.saturating_sub(&h))
+        MatVec::new(
+            a.saturating_sub(&e),
+            b.saturating_sub(&f),
+            c.saturating_sub(&g),
+            d.saturating_sub(&h),
+        )
     }
 }
 
@@ -138,7 +146,9 @@ impl<T: Copy + Mul<u16, Output = T>> Mul<u16> for MatVec<T> {
         MatVec::new(a * rhs, b * rhs, c * rhs, d * rhs)
     }
 }
-impl<T: Copy + Div<Output = T> + Bounded + Zero + Add<Output=T> + Sub<u16, Output=T>> Div for MatVec<T> {
+impl<T: Copy + Div<Output = T> + Bounded + Zero + Add<Output = T> + Sub<u16, Output = T>> Div
+    for MatVec<T>
+{
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
@@ -197,7 +207,7 @@ impl State {
         let max_usages = blueprint.max_costs() * self.minutes;
         gains.map2(max_usages, |a, b| a > b)
     }
-    
+
     fn enough_robots(&self, blueprint: &Blueprint) -> MatVec<bool> {
         self.robots.map2(blueprint.max_costs(), |a, b| a >= b)
     }
@@ -214,7 +224,10 @@ impl State {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.minutes.cmp(&other.minutes).then_with(|| self.materials[Geode].cmp(&other.materials[Geode])).then_with(|| (self.robots, self.materials).cmp(&(other.robots, other.materials)))
+        self.minutes
+            .cmp(&other.minutes)
+            .then_with(|| self.materials[Geode].cmp(&other.materials[Geode]))
+            .then_with(|| (self.robots, self.materials).cmp(&(other.robots, other.materials)))
     }
 }
 
@@ -240,15 +253,15 @@ fn sum_for(blueprints: &[Blueprint], minutes: u16) -> Vec<(u16, u16)> {
         let mut scores = HashMap::new();
         let mut max_geodes = vec![0; minutes as usize + 1];
 
-
         while let Some(state) = heap.pop() {
             // no cycles exist, but it's likely for two branches to converge
             if scores.contains_key(&state) {
                 continue;
             }
             scores.insert(state, state.materials[Geode]);
-            max_geodes[state.minutes as usize] = max_geodes[state.minutes as usize].max(state.materials[Geode]);
-            
+            max_geodes[state.minutes as usize] =
+                max_geodes[state.minutes as usize].max(state.materials[Geode]);
+
             // no further options
             if state.minutes == 0 {
                 continue;
@@ -284,7 +297,7 @@ fn sum_for(blueprints: &[Blueprint], minutes: u16) -> Vec<(u16, u16)> {
         }
         counts.push((blueprint.id, max_geodes.into_iter().max().unwrap_or(0)));
     }
-    
+
     println!("visited {visited} states");
     counts
 }
@@ -296,5 +309,8 @@ fn quick_but_wide(blueprints: &[Blueprint]) -> u16 {
 
 #[aoc(day19, part2)]
 fn slow_but_narrow(blueprints: &[Blueprint]) -> u16 {
-    sum_for(&blueprints[0..3], 32).iter().map(|(_, b)| b).product()
+    sum_for(&blueprints[0..3], 32)
+        .iter()
+        .map(|(_, b)| b)
+        .product()
 }
