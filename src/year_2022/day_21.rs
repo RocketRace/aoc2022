@@ -21,19 +21,19 @@ fn inverse(original: &Monkey, args: Result<Rational64, Rational64>, rhs: Rationa
         // commutative
         Monkey::Add(_, _) => match args {
             Ok(x) | Err(x) => rhs - x,
-        }
+        },
         Monkey::Mul(_, _) => match args {
-            Ok(x) | Err(x) => rhs / x
-        }
+            Ok(x) | Err(x) => rhs / x,
+        },
         // noncommutative
         Monkey::Sub(_, _) => match args {
             Ok(x) => x - rhs,
-            Err(x) => rhs + x
-        }
+            Err(x) => rhs + x,
+        },
         Monkey::Div(_, _) => match args {
             Ok(x) => x / rhs,
-            Err(x) => rhs * x
-        }
+            Err(x) => rhs * x,
+        },
         _ => rhs,
     }
 }
@@ -60,10 +60,9 @@ impl Monkey {
 
     fn args(&self) -> Option<(Name, Name)> {
         match self {
-            Monkey::Add(x, y)
-            | Monkey::Sub(x, y)
-            | Monkey::Mul(x, y)
-            | Monkey::Div(x, y) => Some((*x, *y)),
+            Monkey::Add(x, y) | Monkey::Sub(x, y) | Monkey::Mul(x, y) | Monkey::Div(x, y) => {
+                Some((*x, *y))
+            }
             _ => None,
         }
     }
@@ -121,7 +120,7 @@ fn solve(input: &[(Name, Monkey)]) -> i64 {
         let args = match (l_result, r_result) {
             (Some(x), None) => Ok(Rational64::from(x)),
             (None, Some(x)) => Err(Rational64::from(x)),
-            _ => unreachable!("funny")
+            _ => unreachable!("funny"),
         };
         rhs = inverse(&lhs, args, rhs);
         lhs = if args.is_ok() {
