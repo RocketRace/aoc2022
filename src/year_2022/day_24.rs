@@ -2,19 +2,12 @@ use std::collections::VecDeque;
 
 use bit_vec::BitVec;
 use fxhash::FxHashSet;
-use num::integer::lcm;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct State {
     step: usize,
     x: usize,
     y: usize,
-}
-
-impl State {
-    fn modulo(self, cycle: usize) -> State {
-        State { step: self.step % cycle, ..self }
-    }
 }
 
 #[derive(Debug)]
@@ -29,18 +22,21 @@ struct Blizzards {
 
 impl Blizzards {
     fn blizzed(&self, state: State) -> bool {
-        state.y != 0 && state.y != self.height + 1 && (
-            self.right[state.y - 1][(state.x as isize - state.step as isize).rem_euclid(self.width as isize) as usize]
-            || self.left[state.y - 1][((state.x + state.step) % self.width)]
-            || self.down[state.x][(state.y as isize - state.step as isize - 1).rem_euclid(self.height as isize) as usize]
-            || self.up[state.x][(state.y + state.step - 1) % self.height]
-        )
+        state.y != 0
+            && state.y != self.height + 1
+            && (self.right[state.y - 1]
+                [(state.x as isize - state.step as isize).rem_euclid(self.width as isize) as usize]
+                || self.left[state.y - 1][((state.x + state.step) % self.width)]
+                || self.down[state.x][(state.y as isize - state.step as isize - 1)
+                    .rem_euclid(self.height as isize)
+                    as usize]
+                || self.up[state.x][(state.y + state.step - 1) % self.height])
     }
 
     fn walled(&self, state: State) -> bool {
         (state.x != 0 && state.y == 0) || (state.x != self.width - 1 && state.y == self.height + 1)
-    }   
-    
+    }
+
     fn check_and_add(&self, queue: &mut VecDeque<State>, state: State) {
         if !self.blizzed(state) && !self.walled(state) {
             queue.push_back(state);
@@ -86,16 +82,16 @@ fn pathfind(blizzards: &Blizzards, initial_state: State, goal: (usize, usize)) -
     queue.push_back(initial_state);
 
     while let Some(state) = queue.pop_front() {
-
         if (state.x, state.y) == goal {
             return state;
         }
 
-        if visited.contains(&state){//}.modulo(cycle)) {
+        if visited.contains(&state) {
+            //}.modulo(cycle)) {
             continue;
         }
-        visited.insert(state);//.modulo(cycle));
-        
+        visited.insert(state); //.modulo(cycle));
+
         if state.x < blizzards.width - 1 {
             let new = State {
                 step: state.step + 1,
@@ -141,13 +137,34 @@ fn pathfind(blizzards: &Blizzards, initial_state: State, goal: (usize, usize)) -
 
 #[aoc(day24, part1)]
 fn one_way(blizzards: &Blizzards) -> usize {
-    pathfind(blizzards, State {step: 0, x: 0, y: 0}, (blizzards.width - 1, blizzards.height + 1)).step
+    pathfind(
+        blizzards,
+        State {
+            step: 0,
+            x: 0,
+            y: 0,
+        },
+        (blizzards.width - 1, blizzards.height + 1),
+    )
+    .step
 }
 
 #[aoc(day24, part2)]
 fn three_way(blizzards: &Blizzards) -> usize {
-    let first_step = pathfind(blizzards, State {step: 0, x: 0, y: 0}, (blizzards.width - 1, blizzards.height + 1));
+    let first_step = pathfind(
+        blizzards,
+        State {
+            step: 0,
+            x: 0,
+            y: 0,
+        },
+        (blizzards.width - 1, blizzards.height + 1),
+    );
     let second_step = pathfind(blizzards, first_step, (0, 0));
-    pathfind(blizzards, second_step, (blizzards.width - 1, blizzards.height + 1)).step
+    pathfind(
+        blizzards,
+        second_step,
+        (blizzards.width - 1, blizzards.height + 1),
+    )
+    .step
 }
-
