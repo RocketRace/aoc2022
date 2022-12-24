@@ -1,6 +1,7 @@
-use std::collections::{VecDeque, HashSet};
+use std::collections::VecDeque;
 
 use bit_vec::BitVec;
+use fxhash::FxHashSet;
 use num::integer::lcm;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -80,8 +81,7 @@ fn generator(input: &str) -> Blizzards {
 }
 
 fn pathfind(blizzards: &Blizzards, initial_state: State, goal: (usize, usize)) -> State {
-    let cycle = lcm(blizzards.width, blizzards.height);
-    let mut visited = HashSet::new();
+    let mut visited = FxHashSet::default();
     let mut queue = VecDeque::new();
     queue.push_back(initial_state);
 
@@ -91,10 +91,10 @@ fn pathfind(blizzards: &Blizzards, initial_state: State, goal: (usize, usize)) -
             return state;
         }
 
-        if visited.contains(&state.modulo(cycle)) {
+        if visited.contains(&state){//}.modulo(cycle)) {
             continue;
         }
-        visited.insert(state.modulo(cycle));
+        visited.insert(state);//.modulo(cycle));
         
         if state.x < blizzards.width - 1 {
             let new = State {
