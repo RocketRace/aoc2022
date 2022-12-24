@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 aoc-runner = "0.3.0"
 aoc-runner-derive = "0.3.0"
+bit-vec = "0.6.3"
 fxhash = "0.2.1"
 nom = "7.1.1"
 num = "0.4.0"
